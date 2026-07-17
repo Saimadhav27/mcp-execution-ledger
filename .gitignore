@@ -1,0 +1,14 @@
+node_modules/
+**/node_modules/
+
+dist/
+.next/
+**/.next/
+
+out/
+**/out/
+
+.nitrostudio/
+
+ledger.db
+.env
