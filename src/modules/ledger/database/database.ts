@@ -1,5 +1,6 @@
 import * as path from 'path';
 import * as fs from 'fs';
+import * as os from 'os';
 import sqlite3 from 'sqlite3';
 import { fileURLToPath } from 'url';
 
@@ -9,7 +10,10 @@ export interface DatabaseConnection {
 }
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
-const databaseFilePath = path.join(process.cwd(), 'ledger.db');
+const databaseDir = path.join(os.tmpdir(), 'mcp-execution-ledger');
+fs.mkdirSync(databaseDir, { recursive: true });
+
+const databaseFilePath = path.join(databaseDir, 'ledger.db');
 
 function resolveSchemaPath(): string {
   const candidates = [
