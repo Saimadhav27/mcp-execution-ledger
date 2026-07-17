@@ -11,4 +11,12 @@ out/
 .nitrostudio/
 
 ledger.db
+*.db
+*.sqlite
+*.sqlite3
+*.log
+logs/
+uploads/
+tmp/
+data/
 .env

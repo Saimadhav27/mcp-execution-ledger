@@ -4,11 +4,19 @@
   "private": true,
   "type": "module",
   "description": "Durable execution layer for MCP tool calls with immutable execution logs, checkpoint-based recovery, and replay.",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
   "scripts": {
     "dev": "nitrostack-cli dev",
-    "build": "nitrostack-cli build",
+    "build:assets": "node ./scripts/build-assets.mjs",
+    "build": "nitrostack-cli build && npm run build:assets",
     "start": "npm run build && nitrostack-cli start",
     "start:prod": "nitrostack-cli start",
+    "prepare": "npm run build",
+    "postinstall": "node -e \"const fs=require('fs'); if(fs.existsSync('./scripts/postinstall.mjs')) import('./scripts/postinstall.mjs'); else console.log('Skipping postinstall during container dependency install');\"",
     "upgrade": "nitrostack-cli upgrade",
     "install:all": "nitrostack-cli install",
     "widget": "npm --prefix src/widgets"
@@ -25,6 +33,9 @@
     "@nitrostack/cli": "^1.0.14",
     "@types/node": "^22.10.0",
     "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   },
   "author": "Tallam Sai Madhav",
   "nitrostack": {

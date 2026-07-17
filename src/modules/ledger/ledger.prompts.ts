@@ -74,27 +74,41 @@ Just call the 'calculate' tool with the operation and two numbers!`
   async summarizeSession(args: { sessionId?: string }, ctx: ExecutionContext) {
     ctx.logger.info('Generating session summary prompt', { sessionId: args.sessionId });
 
-    const session = await this.repository.getSession(args.sessionId ?? '');
-    if (!session) {
-      throw new Error(`Session not found: ${args.sessionId}`);
-    }
-
-    const timeline = session.executions
-      .slice()
-      .sort((left, right) => left.timestamp.localeCompare(right.timestamp))
-      .map((execution, index) => `${index + 1}. ${new Date(execution.timestamp).toLocaleString()} - ${execution.toolName} (${execution.status})`)
-      .join('\n');
-
-    return [
-      {
-        role: 'user' as const,
-        content: `Summarize the execution history for session ${session.sessionId}.`
-      },
-      {
-        role: 'assistant' as const,
-        content: `Session ${session.sessionId} started at ${session.startedAt}.\n\nTimeline:\n${timeline || 'No executions recorded yet.'}`
+    try {
+      const session = await this.repository.getSession(args.sessionId ?? '');
+      if (!session) {
+        throw new Error(`Session not found: ${args.sessionId}`);
       }
-    ];
+
+      const timeline = session.executions
+        .slice()
+        .sort((left, right) => left.timestamp.localeCompare(right.timestamp))
+        .map((execution, index) => `${index + 1}. ${new Date(execution.timestamp).toLocaleString()} - ${execution.toolName} (${execution.status})`)
+        .join('\n');
+
+      return [
+        {
+          role: 'user' as const,
+          content: `Summarize the execution history for session ${session.sessionId}.`
+        },
+        {
+          role: 'assistant' as const,
+          content: `Session ${session.sessionId} started at ${session.startedAt}.\n\nTimeline:\n${timeline || 'No executions recorded yet.'}`
+        }
+      ];
+    } catch (error) {
+      ctx.logger.error('Failed to generate session summary prompt', { error: error instanceof Error ? error.message : String(error) });
+      return [
+        {
+          role: 'user' as const,
+          content: `Summarize the execution history for session ${args.sessionId ?? 'unknown'}.`
+        },
+        {
+          role: 'assistant' as const,
+          content: `The prompt could not be generated: ${error instanceof Error ? error.message : String(error)}`
+        }
+      ];
+    }
   }
 
   @Prompt({
@@ -111,27 +125,41 @@ Just call the 'calculate' tool with the operation and two numbers!`
   async replayAnalysis(args: { sessionId?: string }, ctx: ExecutionContext) {
     ctx.logger.info('Generating replay analysis prompt', { sessionId: args.sessionId });
 
-    const session = await this.repository.getSession(args.sessionId ?? '');
-    if (!session) {
-      throw new Error(`Session not found: ${args.sessionId}`);
-    }
-
-    const steps = session.executions
-      .slice()
-      .sort((left, right) => left.timestamp.localeCompare(right.timestamp))
-      .map((execution, index) => `${index + 1}. ${execution.toolName} -> ${execution.status}`)
-      .join('\n');
-
-    return [
-      {
-        role: 'user' as const,
-        content: `Explain the execution flow for session ${session.sessionId}.`
-      },
-      {
-        role: 'assistant' as const,
-        content: `The session began at ${session.startedAt} and progressed through the following steps:\n\n${steps || 'No executions recorded yet.'}`
+    try {
+      const session = await this.repository.getSession(args.sessionId ?? '');
+      if (!session) {
+        throw new Error(`Session not found: ${args.sessionId}`);
       }
-    ];
+
+      const steps = session.executions
+        .slice()
+        .sort((left, right) => left.timestamp.localeCompare(right.timestamp))
+        .map((execution, index) => `${index + 1}. ${execution.toolName} -> ${execution.status}`)
+        .join('\n');
+
+      return [
+        {
+          role: 'user' as const,
+          content: `Explain the execution flow for session ${session.sessionId}.`
+        },
+        {
+          role: 'assistant' as const,
+          content: `The session began at ${session.startedAt} and progressed through the following steps:\n\n${steps || 'No executions recorded yet.'}`
+        }
+      ];
+    } catch (error) {
+      ctx.logger.error('Failed to generate replay analysis prompt', { error: error instanceof Error ? error.message : String(error) });
+      return [
+        {
+          role: 'user' as const,
+          content: `Explain the execution flow for session ${args.sessionId ?? 'unknown'}.`
+        },
+        {
+          role: 'assistant' as const,
+          content: `The prompt could not be generated: ${error instanceof Error ? error.message : String(error)}`
+        }
+      ];
+    }
   }
 
   @Prompt({
@@ -148,26 +176,40 @@ Just call the 'calculate' tool with the operation and two numbers!`
   async failureAnalysis(args: { sessionId?: string }, ctx: ExecutionContext) {
     ctx.logger.info('Generating failure analysis prompt', { sessionId: args.sessionId });
 
-    const session = await this.repository.getSession(args.sessionId ?? '');
-    if (!session) {
-      throw new Error(`Session not found: ${args.sessionId}`);
-    }
-
-    const failures = session.executions.filter((execution) => execution.status === 'failed');
-    const likelyCauses = failures.length > 0
-      ? failures.map((execution) => `- ${execution.toolName}: verify tool input, dependencies, and recent schema changes`).join('\n')
-      : '- No failed executions were recorded in this session.';
-
-    return [
-      {
-        role: 'user' as const,
-        content: `Analyze the failed executions in session ${session.sessionId}.`
-      },
-      {
-        role: 'assistant' as const,
-        content: `Session ${session.sessionId} contains ${failures.length} failed execution(s).\n\nLikely causes:\n${likelyCauses}`
+    try {
+      const session = await this.repository.getSession(args.sessionId ?? '');
+      if (!session) {
+        throw new Error(`Session not found: ${args.sessionId}`);
       }
-    ];
+
+      const failures = session.executions.filter((execution) => execution.status === 'failed');
+      const likelyCauses = failures.length > 0
+        ? failures.map((execution) => `- ${execution.toolName}: verify tool input, dependencies, and recent schema changes`).join('\n')
+        : '- No failed executions were recorded in this session.';
+
+      return [
+        {
+          role: 'user' as const,
+          content: `Analyze the failed executions in session ${session.sessionId}.`
+        },
+        {
+          role: 'assistant' as const,
+          content: `Session ${session.sessionId} contains ${failures.length} failed execution(s).\n\nLikely causes:\n${likelyCauses}`
+        }
+      ];
+    } catch (error) {
+      ctx.logger.error('Failed to generate failure analysis prompt', { error: error instanceof Error ? error.message : String(error) });
+      return [
+        {
+          role: 'user' as const,
+          content: `Analyze the failed executions in session ${args.sessionId ?? 'unknown'}.`
+        },
+        {
+          role: 'assistant' as const,
+          content: `The prompt could not be generated: ${error instanceof Error ? error.message : String(error)}`
+        }
+      ];
+    }
   }
 
   @Prompt({
@@ -184,21 +226,35 @@ Just call the 'calculate' tool with the operation and two numbers!`
   async checkpointSummary(args: { checkpointId?: string }, ctx: ExecutionContext) {
     ctx.logger.info('Generating checkpoint summary prompt', { checkpointId: args.checkpointId });
 
-    const checkpoint = await this.repository.getCheckpoint(args.checkpointId ?? '');
-    if (!checkpoint) {
-      throw new Error(`Checkpoint not found: ${args.checkpointId}`);
-    }
-
-    return [
-      {
-        role: 'user' as const,
-        content: `Summarize checkpoint ${checkpoint.checkpointId}.`
-      },
-      {
-        role: 'assistant' as const,
-        content: `Checkpoint ${checkpoint.checkpointId} was created at ${checkpoint.timestamp} and captures ${checkpoint.executionCount} execution(s). It includes ${checkpoint.executionIds.length} recorded execution identifier(s).`
+    try {
+      const checkpoint = await this.repository.getCheckpoint(args.checkpointId ?? '');
+      if (!checkpoint) {
+        throw new Error(`Checkpoint not found: ${args.checkpointId}`);
       }
-    ];
+
+      return [
+        {
+          role: 'user' as const,
+          content: `Summarize checkpoint ${checkpoint.checkpointId}.`
+        },
+        {
+          role: 'assistant' as const,
+          content: `Checkpoint ${checkpoint.checkpointId} was created at ${checkpoint.timestamp} and captures ${checkpoint.executionCount} execution(s). It includes ${checkpoint.executionIds.length} recorded execution identifier(s).`
+        }
+      ];
+    } catch (error) {
+      ctx.logger.error('Failed to generate checkpoint summary prompt', { error: error instanceof Error ? error.message : String(error) });
+      return [
+        {
+          role: 'user' as const,
+          content: `Summarize checkpoint ${args.checkpointId ?? 'unknown'}.`
+        },
+        {
+          role: 'assistant' as const,
+          content: `The prompt could not be generated: ${error instanceof Error ? error.message : String(error)}`
+        }
+      ];
+    }
   }
 
   private getOperationHelp(operation: string): string {

@@ -68,14 +68,25 @@ export class LedgerResources {
   async getAllSessions(uri: string, ctx: ExecutionContext) {
     ctx.logger.info('Fetching all ledger sessions');
 
-    const sessions = await this.repository.listSessions();
-    return {
-      contents: [{
-        uri,
-        mimeType: 'application/json',
-        text: JSON.stringify({ sessions }, null, 2)
-      }]
-    };
+    try {
+      const sessions = await this.repository.listSessions();
+      return {
+        contents: [{
+          uri,
+          mimeType: 'application/json',
+          text: JSON.stringify({ sessions }, null, 2)
+        }]
+      };
+    } catch (error) {
+      ctx.logger.error('Failed to load ledger sessions resource', { error: error instanceof Error ? error.message : String(error) });
+      return {
+        contents: [{
+          uri,
+          mimeType: 'application/json',
+          text: JSON.stringify({ error: error instanceof Error ? error.message : String(error) }, null, 2)
+        }]
+      };
+    }
   }
 
   @Resource({
@@ -88,14 +99,25 @@ export class LedgerResources {
     const sessionId = this.extractPathValue(uri, 'ledger://session/');
     ctx.logger.info('Fetching ledger session resource', { sessionId });
 
-    const session = await this.repository.getSession(sessionId);
-    return {
-      contents: [{
-        uri,
-        mimeType: 'application/json',
-        text: JSON.stringify({ session }, null, 2)
-      }]
-    };
+    try {
+      const session = await this.repository.getSession(sessionId);
+      return {
+        contents: [{
+          uri,
+          mimeType: 'application/json',
+          text: JSON.stringify({ session }, null, 2)
+        }]
+      };
+    } catch (error) {
+      ctx.logger.error('Failed to load ledger session resource', { error: error instanceof Error ? error.message : String(error) });
+      return {
+        contents: [{
+          uri,
+          mimeType: 'application/json',
+          text: JSON.stringify({ error: error instanceof Error ? error.message : String(error) }, null, 2)
+        }]
+      };
+    }
   }
 
   @Resource({
@@ -108,14 +130,25 @@ export class LedgerResources {
     const checkpointId = this.extractPathValue(uri, 'ledger://checkpoint/');
     ctx.logger.info('Fetching ledger checkpoint resource', { checkpointId });
 
-    const checkpoint = await this.repository.getCheckpoint(checkpointId);
-    return {
-      contents: [{
-        uri,
-        mimeType: 'application/json',
-        text: JSON.stringify({ checkpoint }, null, 2)
-      }]
-    };
+    try {
+      const checkpoint = await this.repository.getCheckpoint(checkpointId);
+      return {
+        contents: [{
+          uri,
+          mimeType: 'application/json',
+          text: JSON.stringify({ checkpoint }, null, 2)
+        }]
+      };
+    } catch (error) {
+      ctx.logger.error('Failed to load ledger checkpoint resource', { error: error instanceof Error ? error.message : String(error) });
+      return {
+        contents: [{
+          uri,
+          mimeType: 'application/json',
+          text: JSON.stringify({ error: error instanceof Error ? error.message : String(error) }, null, 2)
+        }]
+      };
+    }
   }
 
   private extractPathValue(uri: string, prefix: string): string {

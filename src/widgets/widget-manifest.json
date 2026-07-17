@@ -1,10 +1,54 @@
 {
   "version": "1.0.0",
+  "generatedAt": "2025-01-01T00:00:00.000Z",
   "widgets": [
     {
-      "uri": "/calculator-result",
+      "name": "Ledger Dashboard",
+      "description": "Displays the execution ledger dashboard with statistics, recent sessions, and executions",
+      "uri": "/ledger-dashboard",
+      "tags": ["ledger", "dashboard", "statistics"],
+      "examples": [
+        {
+          "name": "Ledger Dashboard Example",
+          "description": "Shows a sample ledger dashboard with active sessions and executions",
+          "data": {
+            "statistics": {
+              "totalSessions": 5,
+              "totalExecutions": 12,
+              "totalCheckpoints": 2,
+              "successRate": 83.33,
+              "failureRate": 16.67,
+              "latestSession": {
+                "sessionId": "sess_1721249709000_1234",
+                "startedAt": "2026-07-17T20:55:09.000Z",
+                "executionCount": 4
+              }
+            },
+            "recentSessions": [
+              {
+                "sessionId": "sess_1721249709000_1234",
+                "startedAt": "2026-07-17T20:55:09.000Z",
+                "executionCount": 4,
+                "checkpointCount": 1
+              }
+            ],
+            "recentExecutions": [
+              {
+                "executionId": "exec_1721249715000_5678",
+                "timestamp": "2026-07-17T20:55:15.000Z",
+                "toolName": "calculate",
+                "status": "success"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
       "name": "Calculator Result",
       "description": "Displays the result of a calculation with operation details",
+      "uri": "/calculator-result",
+      "tags": ["calculator", "math", "result"],
       "examples": [
         {
           "name": "Addition Example",
@@ -39,10 +83,7 @@
             "expression": "20 ÷ 4 = 5"
           }
         }
-      ],
-      "tags": ["calculator", "math", "result"]
+      ]
     }
-  ],
-  "generatedAt": "2025-01-01T00:00:00.000Z"
+  ]
 }
-

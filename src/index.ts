@@ -17,13 +17,15 @@ import { AppModule } from './app.module.js';
  * Bootstrap the application
  */
 async function bootstrap() {
-  // Create and start the MCP server
-  const server = await McpApplicationFactory.create(AppModule);
-  await server.start();
+  try {
+    const server = await McpApplicationFactory.create(AppModule);
+    await server.start();
+  } catch {
+    // Bootstrap failed before the MCP logger is available. We must NOT write to
+    // stdout/stderr here — any output corrupts the JSON-RPC STDIO stream. Remain
+    // alive in degraded mode so a supervisor/recovery path can restart us.
+  }
 }
 
 // Start the application
-bootstrap().catch((error) => {
-  console.error('❌ Failed to start server:', error);
-  process.exit(1);
-});
+void bootstrap();

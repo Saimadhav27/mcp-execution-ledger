@@ -1,6 +1,7 @@
 import { ToolDecorator as Tool, Widget, ExecutionContext, z } from '@nitrostack/core';
 import * as fs from 'fs';
 import * as path from 'path';
+import { getLedgerDataDirectory } from './database/database.js';
 import { LedgerRepository, type RecordExecutionInput } from './database/ledger.repository.js';
 
 export class LedgerTools {
@@ -100,12 +101,16 @@ export class LedgerTools {
       to: input.to_unit
     });
 
-    const uploadsDir = path.join(process.cwd(), 'uploads');
-    if (!fs.existsSync(uploadsDir)) {
+    const uploadsDir = path.join(getLedgerDataDirectory(), 'uploads');
+    try {
       fs.mkdirSync(uploadsDir, { recursive: true });
+    } catch (error) {
+      ctx.logger.warn('Unable to create uploads directory', { error: error instanceof Error ? error.message : String(error) });
     }
 
-    const filePath = path.join(uploadsDir, input.file_name);
+    const requestedName = typeof input.file_name === 'string' ? input.file_name.trim() : 'upload.bin';
+    const safeFileName = requestedName.replace(/[\\/]/g, '_').replace(/\.\./g, '_').replace(/\0/g, '').trim() || 'upload.bin';
+    const filePath = path.join(uploadsDir, safeFileName);
 
     if (input.file_content) {
       try {
@@ -363,6 +368,7 @@ export class LedgerTools {
     description: 'Returns system statistics along with the latest sessions and executions.',
     inputSchema: z.object({})
   })
+  @Widget('ledger-dashboard')
   async ledgerDashboard(input: Record<string, never>, ctx: ExecutionContext) {
     ctx.logger.info('Generating ledger dashboard snapshot');
 
