@@ -15,7 +15,8 @@
     "build": "nitrostack-cli build && npm run build:assets",
     "start": "npm run build && nitrostack-cli start",
     "start:prod": "nitrostack-cli start",
-    "prepare": "echo Skipping prepare during container install",    "postinstall": "node -e \"const fs=require('fs'); if(fs.existsSync('./scripts/postinstall.mjs')) import('./scripts/postinstall.mjs'); else console.log('Skipping postinstall during container dependency install');\"",
+    "prepare": "echo Skipping prepare during container install", 
+    "postinstall": "node -e \"const fs=require('fs'); if(fs.existsSync('./scripts/postinstall.mjs')) import('./scripts/postinstall.mjs'); else console.log('Skipping postinstall during container dependency install');\"",
     "upgrade": "nitrostack-cli upgrade",
     "install:all": "nitrostack-cli install",
     "widget": "npm --prefix src/widgets"
