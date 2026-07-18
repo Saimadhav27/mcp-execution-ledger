@@ -15,8 +15,8 @@ const sqlite = sqlite3.verbose();
 
 let initializationPromise: Promise<void> | null = null;
 let initializationError: Error | null = null;
-let databasePath = path.join(os.tmpdir(), 'mcp-execution-ledger', 'ledger.db');
-let databaseConnection: sqlite3.Database = new sqlite.Database(databasePath);
+let databasePath = ':memory:';
+let databaseConnection!: sqlite3.Database;
 
 function getConfiguredPathCandidates(): string[] {
   const configuredValues = [
@@ -141,6 +141,10 @@ export async function initializeLedgerDatabase(): Promise<void> {
     databasePath = targetPath;
 
     try {
+      if (targetPath !== ':memory:') {
+
+        fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+      }
       databaseConnection = new sqlite.Database(targetPath);
       database = databaseConnection;
       if (schemaPath) {
